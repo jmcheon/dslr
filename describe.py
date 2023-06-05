@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import sys, os
+import sys
 from TinyStatistician import TinyStatistician as Tstat
 
 def load_data(path):
@@ -64,10 +64,26 @@ def compare_df(real, mine):
 		print(real_null)
 		print("Missing or null values in mine:")
 		print(mine_null)
+
+def data_analysis(path):
+	# Load the data
+	df, features = load_data(path)
+	#print(f"features: {features}")
+
+	numerical_df = df.select_dtypes(include='number')
+	print("numerical_df shape:", numerical_df.shape)
+
+	numerical_features = numerical_df.columns.tolist()
+	#print(f"numerical_features: {numerical_features}")
+
+	numerical_data = numerical_df.values
+	#print("numerical_data shape:", numerical_data.shape)
+
+	return describe(numerical_data, numerical_features)
 	
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
-		print(f"Usage: {sys.argv[0]} [data path]")
+		print(f"Usage: python {sys.argv[0]} [data path]")
 	else:
 		# Load the data
 		df, features = load_data(sys.argv[1])
