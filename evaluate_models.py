@@ -1,8 +1,8 @@
-from sklearn.metrics import accuracy_score
-import sys, os, pickle
-import pandas as pd
 import numpy as np
-from benchmark_train import normalization, predict_
+import pandas as pd
+import sys, os, pickle
+from sklearn.metrics import accuracy_score
+from logreg_train import normalization, predict_
 
 def load_data(path):
 	#print(f"path: {path}")
