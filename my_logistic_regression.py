@@ -123,9 +123,7 @@ class MyLogisticRegression():
 		new_theta = np.copy(self.thetas.astype("float64"))
 		temp_x = np.copy(x.astype("float64"))
 		temp_y = np.copy(y.astype("float64"))
-		print(temp_x.shape, temp_y.shape)
-		#random_index = 0
-		X = np.hstack((np.ones((x.shape[0], 1)), x))
+		#print(temp_x.shape, temp_y.shape)
 		for i in range(self.max_iter):
 
 			random_index = random.randint(0, x.shape[0] - 1)
