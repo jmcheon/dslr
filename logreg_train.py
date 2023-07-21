@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import sys, os, random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from my_logistic_regression import MyLogisticRegression as MyLR
 
 def load_data(path):
 	print(f"path: {path}")
@@ -242,7 +243,7 @@ def stochastic_fit(x, y, thetas, alpha, max_iter):
 	thetas = new_theta
 	return thetas, accuracy, accuracy_list, loss_list, epoch_list
 
-def batch_fit(x, y, thetas, alpha, max_iter):
+def fit_(x, y, thetas, alpha, max_iter, optimizer='batch'):
 	for v in [x, y, thetas]:
 		if not isinstance(v, np.ndarray):
 			print(f"Invalid input: argument {v} of ndarray type required")
@@ -274,6 +275,9 @@ def batch_fit(x, y, thetas, alpha, max_iter):
 	if not isinstance(max_iter, int):
 		print(f"Invalid input: argument max_iter of int type required")
 		return None
+	if not optimizer in ['batch', 'mini', 'sgd', None]:
+		print(f"Invalid input: invalid value of optimizer {optimizer}")
+		return False
 
 	accuracy_list = []
 	loss_list = []
@@ -283,9 +287,31 @@ def batch_fit(x, y, thetas, alpha, max_iter):
 	new_theta = np.copy(thetas.astype("float64"))
 
 	for i in range(max_iter):
-		# Compute gradient descent
-		y_pred = np.array(1 / (1 + np.exp(-X.dot(new_theta))))
-		grad = np.dot(X.T, (y_pred - y)) / len(y)
+		if optimizer == 'sgd': 
+			random_index = random.randint(0, x.shape[0] - 1)
+			sample_x = X[random_index].reshape(1, -1)
+			sample_y = y[random_index].reshape(1, -1)
+			y_pred = np.array(1 / (1 + np.exp(-sample_x.dot(new_theta))))
+			grad = np.dot(sample_x.T, (y_pred - sample_y)) / len(sample_y)
+			binary_predictions = (y_pred >= 0.5).astype(int)
+			accuracy = accuracy_score(sample_y, binary_predictions)
+			loss = loss_(sample_y, y_pred)
+		elif optimizer == 'mini':
+			random_index = random.randint(0, x.shape[0] - 1)
+			sample_x = X[random_index:random_index + 5]
+			sample_y = y[random_index:random_index + 5]
+			y_pred = np.array(1 / (1 + np.exp(-sample_x.dot(new_theta))))
+			grad = np.dot(sample_x.T, (y_pred - sample_y)) / len(sample_y)
+			binary_predictions = (y_pred >= 0.5).astype(int)
+			accuracy = accuracy_score(sample_y, binary_predictions)
+			loss = loss_(sample_y, y_pred)
+		else:
+			y_pred = np.array(1 / (1 + np.exp(-X.dot(new_theta))))
+			grad = np.dot(X.T, (y_pred - y)) / len(y)
+			#grad = gradient(x, y ,new_theta)
+			binary_predictions = (y_pred >= 0.5).astype(int)
+			accuracy = accuracy_score(y, binary_predictions)
+			loss = loss_(y, y_pred)
         # Handle invalid values in the gradient
 		if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
 			#print("Warning: Invalid values encountered in the gradient. Skipping update.")
@@ -294,67 +320,12 @@ def batch_fit(x, y, thetas, alpha, max_iter):
 		new_theta -= (alpha * grad)
 		#print(y.shape, y_pred.shape, type(y), type(y_pred))
 		#print(y[:5], y_pred[:5])
-		binary_predictions = (y_pred >= 0.5).astype(int)
-		accuracy = accuracy_score(y, binary_predictions)
-		loss = loss_(y, y_pred)
 		if i % 10 == 0: 
 			accuracy_list.append(accuracy)
 			loss_list.append(loss)
 			epoch_list.append(i)
 	thetas = new_theta
 	return thetas, accuracy, accuracy_list, loss_list, epoch_list
-
-def fit_(x, y, thetas, alpha, max_iter):
-	for v in [x, y, thetas]:
-		if not isinstance(v, np.ndarray):
-			print(f"Invalid input: argument {v} of ndarray type required")
-			return None
-
-	if not x.ndim == 2:
-		print(f"Invalid input: wrong shape of x", x.shape)
-		return None
-
-	if y.ndim == 1:
-		y = y.reshape(y.size, 1)
-	elif not (y.ndim == 2 and y.shape[1] == 1):
-		print(f"Invalid input: wrong shape of y", y.shape)
-		return None
-	
-	if x.shape[0] != y.shape[0]:
-		print(f"Invalid input: x, y matrices should be compatible.", x.shape[0], y.shape[0])
-		return None
-
-	if thetas.ndim == 1 and thetas.size == x.shape[1] + 1:
-		thetas = thetas.reshape(x.shape[1] + 1, 1)
-	elif not (thetas.ndim == 2 and thetas.shape == (x.shape[1] + 1, 1)):
-		print(f"Invalid input: wrong shape of {thetas}", thetas.shape)
-		return None
-
-	if not isinstance(alpha, float) or alpha <= 0:
-		print(f"Invalid input: argument alpha of positive float type required")	
-		return None
-	if not isinstance(max_iter, int):
-		print(f"Invalid input: argument max_iter of int type required")
-		return None
-
-	# Weights to update: alpha * mean((y_hat - y) * x) 
-	# Bias to update: alpha * mean(y_hat - y)
-	X = np.hstack((np.ones((x.shape[0], 1)), x))
-	new_theta = np.copy(thetas.astype("float64"))
-	i = 0
-	for _ in range(max_iter):
-		# Compute gradient descent
-		y_hat = np.array(1 / (1 + np.exp(-X.dot(new_theta))))
-		grad = np.dot(X.T, (y_hat - y)) / len(y)
-		#grad = gradient(x, y ,new_theta)
-        # Handle invalid values in the gradient
-		if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
-			#print("Warning: Invalid values encountered in the gradient. Skipping update.")
-			continue
-		# Update new_theta
-		new_theta -= (alpha * grad)
-	thetas = new_theta
-	return thetas
 
 def predict_(x, thetas):
 	for v in [x, thetas]:
@@ -382,10 +353,13 @@ def compare_optimization_algorithms(data, target_categories, weights):
 		print(f"Current house: {house}")
 		y_labelled = label_data(data[:,-1], house)
 		#theta = fit_(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
-		theta, accuracy, accuracy_list, loss_list, epoch_list = batch_fit(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
-		theta_sgd, accuracy_sgd, accuracy_list_sgd, loss_list_sgd, epoch_list_sgd = stochastic_fit(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
-		theta_mini, accuracy_mini, accuracy_list_mini, loss_list_mini, epoch_list_mini = mini_batch_fit(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
-		print(accuracy)
+		classifier = MyLR(np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000, None, 0.0, 'batch')
+		theta, accuracy, accuracy_list, loss_list, epoch_list = classifier.fit_(x, y_labelled)
+		classifier.optimizer = 'sgd'
+		theta_sgd, accuracy_sgd, accuracy_list_sgd, loss_list_sgd, epoch_list_sgd = classifier.fit_(x, y_labelled)
+		classifier.optimizer = 'mini'
+		theta_mini, accuracy_mini, accuracy_list_mini, loss_list_mini, epoch_list_mini = classifier.fit_(x, y_labelled)
+		print('Accuracy: ', accuracy_sgd, accuracy_mini, accuracy)
 		axes[0].plot(epoch_list_sgd, loss_list_sgd, label=target_categories[house])
 		axes[1].plot(epoch_list_mini, loss_list_mini, label=target_categories[house])
 		axes[2].plot(epoch_list, loss_list, label=target_categories[house])
