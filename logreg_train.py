@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import sys, os, itertools, pickle
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 def load_data(path):
 	print(f"path: {path}")
@@ -52,6 +53,131 @@ def data_spliter_by(x, y, house):
 	#print("y_labelled[:5]:", y_labelled[:5])
 	return train_test_split(x, y_labelled, test_size=0.2, random_state=42)
 
+def gradient(x, y, theta):
+	"""
+	Computes a gradient vector from three non-empty numpy.ndarray, without any for-loop. The three arrays must have compatible
+	"""
+	for v in [x, y, theta]:
+		if not isinstance(v, np.ndarray):
+			print(f"Invalid input: argument {v} of ndarray type required")
+			return None
+
+	if not x.ndim == 2:
+		print(f"Invalid input: wrong shape of x", x.shape)
+		return None
+
+	if y.ndim == 1:
+		y = y.reshape(y.size, 1)
+	elif not (y.ndim == 2 and y.shape[1] == 1):
+		print(f"Invalid input: wrong shape of y", y.shape)
+		return None
+
+	if x.shape[0] != y.shape[0]:
+		print(f"Invalid input: two vectors of compatible shape are required")
+		return None
+
+	if theta.ndim == 1 and theta.size == x.shape[1] + 1:
+		theta = theta.reshape(x.shape[1] + 1, 1)
+	elif not (theta.ndim == 2 and theta.shape == (x.shape[1] + 1, 1)):
+		print(f"Invalid input: wrong shape of theta", theta.shape)
+		return None
+
+	X = np.hstack((np.ones((x.shape[0], 1)), x))
+	y_hat = np.array(1 / (1 + np.exp(-X.dot(theta))))
+	gradient = np.dot(X.T, (y_hat - y))
+	return gradient / x.shape[0]
+
+def loss_(y, y_hat, eps=1e-15):
+	"""
+	Compute the logistic loss value.
+	"""
+	for v in [y, y_hat]:
+		if not isinstance(v, np.ndarray):
+			print(f"Invalid input: argument {v} of ndarray type required")
+			return None
+
+	if not isinstance(eps, float):
+		print(f"Invalid input: argument esp of float type required")	
+		return None
+	
+	v = [y, y_hat]
+	for i in range(len(v)): 
+		if v[i].ndim == 1:
+			v[i] = v[i].reshape(v[i].size, 1)
+		elif not (v[i].ndim == 2 and v[i].shape[1] == 1):
+			print(f"Invalid input: wrong shape of {v[i]}", v[i].shape)
+			return None
+	y, y_hat = v
+	if y.shape != y_hat.shape:
+		print(f"Invalid input: two vectors of compatible shape are required")
+		return None
+	# Clip values to avoid numerical instability
+	y_hat = np.clip(y_hat, eps, 1 - eps)  
+	loss = -np.mean(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+	return float(loss)
+
+def batch_fit(x, y, thetas, alpha, max_iter):
+	for v in [x, y, thetas]:
+		if not isinstance(v, np.ndarray):
+			print(f"Invalid input: argument {v} of ndarray type required")
+			return None
+
+	if not x.ndim == 2:
+		print(f"Invalid input: wrong shape of x", x.shape)
+		return None
+
+	if y.ndim == 1:
+		y = y.reshape(y.size, 1)
+	elif not (y.ndim == 2 and y.shape[1] == 1):
+		print(f"Invalid input: wrong shape of y", y.shape)
+		return None
+	
+	if x.shape[0] != y.shape[0]:
+		print(f"Invalid input: x, y matrices should be compatible.", x.shape[0], y.shape[0])
+		return None
+
+	if thetas.ndim == 1 and thetas.size == x.shape[1] + 1:
+		thetas = thetas.reshape(x.shape[1] + 1, 1)
+	elif not (thetas.ndim == 2 and thetas.shape == (x.shape[1] + 1, 1)):
+		print(f"Invalid input: wrong shape of {thetas}", thetas.shape)
+		return None
+
+	if not isinstance(alpha, float) or alpha <= 0:
+		print(f"Invalid input: argument alpha of positive float type required")	
+		return None
+	if not isinstance(max_iter, int):
+		print(f"Invalid input: argument max_iter of int type required")
+		return None
+
+	accuracy_list = []
+	loss_list = []
+	epoch_list = []
+
+	X = np.hstack((np.ones((x.shape[0], 1)), x))
+	new_theta = np.copy(thetas.astype("float64"))
+
+	for i in range(max_iter):
+		# Compute gradient descent
+		y_pred = np.array(1 / (1 + np.exp(-X.dot(new_theta))))
+		grad = np.dot(X.T, (y_pred - y)) / len(y)
+        # Handle invalid values in the gradient
+		if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
+			#print("Warning: Invalid values encountered in the gradient. Skipping update.")
+			continue
+		# Update new_theta
+		new_theta -= (alpha * grad)
+		#print(y.shape, y_pred.shape, type(y), type(y_pred))
+		#print(y[:5], y_pred[:5])
+		binary_predictions = (y_pred >= 0.5).astype(int)
+		accuracy = accuracy_score(y, binary_predictions)
+		loss = loss_(y, y_pred)
+		if i % 10 == 0: 
+			accuracy_list.append(accuracy)
+			loss_list.append(loss)
+			epoch_list.append(i)
+	thetas = new_theta
+	return thetas, accuracy, accuracy_list, loss_list, epoch_list
+
 def fit_(x, y, thetas, alpha, max_iter):
 	for v in [x, y, thetas]:
 		if not isinstance(v, np.ndarray):
@@ -89,7 +215,6 @@ def fit_(x, y, thetas, alpha, max_iter):
 	# Bias to update: alpha * mean(y_hat - y)
 	X = np.hstack((np.ones((x.shape[0], 1)), x))
 	new_theta = np.copy(thetas.astype("float64"))
-	new_loss = 0.0
 	i = 0
 	for _ in range(max_iter):
 		# Compute gradient descent
@@ -128,15 +253,30 @@ def train(data, x_features, target_categories):
 	print(f"Starting training each classifier for logistic regression...")
 	x = data[:,:-1]
 	weights = []
+	fig, axes = plt.subplots(1, 2, figsize=(10, 8))
 	for house in range(len(target_categories)):
 		print(f"Current house: {house}")
 		y_labelled = label_data(data[:,-1], house)
-		theta = fit_(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
+		#theta = fit_(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
+		theta, accuracy, accuracy_list, loss_list, epoch_list = batch_fit(x, y_labelled, np.random.rand(x.shape[1] + 1, 1), 1e-1, 1000)
+		print(accuracy)
+		#plt.plot(epoch_list, accuracy_list)
+		axes[0].plot(epoch_list, loss_list, label=target_categories[house])
+		axes[1].plot(epoch_list, accuracy_list, label=target_categories[house])
 
 		# Save the weights for the current class
 		weights.append(theta)
-		print(weights)
-		print("Theta:", theta)
+		#print(weights)
+		#print("Theta:", theta)
+	axes[0].set_xlabel('epoch')
+	axes[0].set_ylabel('loss')
+	axes[0].set_title('[Batch] Loss vs Epoch by Hogwarts House')
+	axes[0].legend()
+	axes[1].set_xlabel('epoch')
+	axes[1].set_ylabel('accuracy')
+	axes[1].set_title('[Batch] Accuracy vs Epoch by Hogwarts House')
+	axes[1].legend()
+	plt.show()
 		
 	# Get the directory of the script
 	script_dir = os.path.dirname(os.path.realpath(__file__))
