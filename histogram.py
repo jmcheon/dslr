@@ -1,20 +1,7 @@
 import sys
-import pandas as pd
 import matplotlib.pyplot as plt
 from hogwarts_mapping import colors
-
-
-def load_data(path):
-    print(f"path: {path}")
-    try:
-        df = pd.read_csv(path, index_col=0)
-    except:
-        print("Invalid file error.")
-        sys.exit()
-    print("df shape:", df.shape)
-    features = df.columns.tolist()
-
-    return (df, features)
+from utils import load_data
 
 
 def display_histogram(df):

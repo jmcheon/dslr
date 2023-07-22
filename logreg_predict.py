@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import sys
-import os
 from my_logistic_regression import MyLogisticRegression
 from hogwarts_mapping import mapping
 from utils import normalization, load_data, fill_columns_mean

@@ -128,13 +128,15 @@ class MyLogisticRegression():
         temp_y = np.copy(y.astype("float64"))
         for i in range(self.max_iter):
 
-            random_index = random.randint(0, x.shape[0] - 1)
             if self.optimizer == 'sgd':
+                random_index = random.randint(0, x.shape[0] - 1)
                 temp_x = x[random_index].reshape(1, -1)
                 temp_y = y[random_index].reshape(1, -1)
             elif self.optimizer == 'mini':
-                temp_x = x[random_index:random_index + 5]
-                temp_y = y[random_index:random_index + 5]
+                batch_size = min(5, x.shape[0])
+                random_index = random.randint(0, x.shape[0] - batch_size)
+                temp_x = x[random_index:random_index + batch_size]
+                temp_y = y[random_index:random_index + batch_size]
 
             # Compute gradient descent
             if self.penalty == None:
@@ -146,7 +148,7 @@ class MyLogisticRegression():
             binary_predictions = (y_pred >= 0.5).astype(int)
             accuracy = accuracy_score(temp_y, binary_predictions)
             loss = self.loss_(temp_y, y_pred)
-# Handle invalid values in the gradient
+            # Handle invalid values in the gradient
             if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
                 # print("Warning: Invalid values encountered in the gradient. Skipping update.")
                 continue
@@ -199,7 +201,7 @@ class MyLogisticRegression():
             elif self.penalty == 'l2':
                 grad, y_pred = self.gradient(
                     sample_x, sample_y, new_theta, self.lambda_)
-        # Handle invalid values in the gradient
+            # Handle invalid values in the gradient
             if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
                 # print("Warning: Invalid values encountered in the gradient. Skipping update.")
                 continue
@@ -243,16 +245,17 @@ class MyLogisticRegression():
         new_theta = np.copy(self.thetas.astype("float64"))
 
         for i in range(self.max_iter):
-            random_index = random.randint(0, x.shape[0] - 1)
-            sample_x = x[random_index:random_index + 5]
-            sample_y = y[random_index:random_index + 5]
+            batch_size = min(5, x.shape[0])
+            random_index = random.randint(0, x.shape[0] - batch_size)
+            sample_x = x[random_index:random_index + batch_size]
+            sample_y = y[random_index:random_index + batch_size]
             # Compute gradient descent
             if self.penalty == None:
                 grad, y_pred = self.gradient(sample_x, sample_y, new_theta)
             elif self.penalty == 'l2':
                 grad, y_pred = self.gradient(
                     sample_x, sample_y, new_theta, self.lambda_)
-# Handle invalid values in the gradient
+            # Handle invalid values in the gradient
             if np.any(np.isnan(grad)) or np.any(np.isinf(grad)):
                 # print("Warning: Invalid values encountered in the gradient. Skipping update.")
                 continue

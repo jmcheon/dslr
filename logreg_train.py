@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys
-import os
-from sklearn.model_selection import train_test_split
+import sys, os
 from my_logistic_regression import MyLogisticRegression as MyLR
 from hogwarts_mapping import mapping, colors
 from utils import load_data, normalization
