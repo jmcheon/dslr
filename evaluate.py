@@ -24,15 +24,15 @@ def load_csv(filename):
     return datas
 
 if __name__ == '__main__':
-    if os.path.isfile("dataset_truth.csv"):
-        truths = load_csv("dataset_truth.csv")
+    if os.path.isfile("./datasets/dataset_truth.csv"):
+        truths = load_csv("./datasets/dataset_truth.csv")
     else:
         sys.exit("Error: missing dataset_truth.csv in the current directory.")
     if os.path.isfile("houses.csv"):
         predictions = load_csv("houses.csv")
     else:
         sys.exit("Error: missing houses.csv in the current directory.")
-    # Here we are comparing each values and counting each time
+    # Here we are comparing each value and counting each time
     count = 0
     if len(truths) == len(predictions):
         for i in range(len(truths)):
