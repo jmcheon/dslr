@@ -60,7 +60,7 @@ Flying                         1600.0     21.958012     97.631602   -181.470000 
 ```
 
 ## 2. Data Visualization
-|[histogram.py](./histogram.py)|[scatter_plot.py](./scatter_plot.py)    |
+|[histogram.py](./histogram.py)|[scatter.py](./scatter.py)    |
 |---------------------------------------------|-------------------------------------------------------|
 |![histogram](https://github.com/jmcheon/dslr/assets/40683323/37f1aff8-fa15-4786-849c-dca507659868)|![scatter](https://github.com/jmcheon/dslr/assets/40683323/d0291802-b765-47ab-b4af-fd1293ee49b3)|
 
@@ -114,8 +114,13 @@ Logistic regression is a supervised machine learning algorithm used primarily fo
 
 It is a type of generalized linear model (GLM) that uses a logistic function (sigmoid function) to model the probability of an instance belonging to the positive class, given its features.
 
-- logreg_train.py saves ./weights.csv
-- logreg_predict.py takes ./weights.csv and saves ./houses.csv
-- evaluate.py - evaluates on dataset_truth.csv with houses.csv
+- [logreg_train.py](./logreg_train.py) saves ./weights.csv
+```
+Usage:  python logreg_train.py [data path] (for batch gradient descent)
+        python logreg_train.py [data path] [batch option]
+        three batch options: batch, sgd (for stochastic), mini (for mini-batch)
+```
+- [logreg_predict.py](./logreg_predict.py) takes ./weights.csv and saves ./houses.csv
+- [evaluate.py](./evaluate.py) - evaluates on dataset_truth.csv with houses.csv
 
 ![optimizers0](https://github.com/jmcheon/dslr/assets/40683323/c6221d34-d6e6-4edc-a906-733046cccced)
