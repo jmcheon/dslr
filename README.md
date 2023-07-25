@@ -123,4 +123,15 @@ Usage:  python logreg_train.py [data path] (for batch gradient descent)
 - [logreg_predict.py](./logreg_predict.py) takes ./weights.csv and saves ./houses.csv
 - [evaluate.py](./evaluate.py) - evaluates on dataset_truth.csv with houses.csv
 
-![optimizers0](https://github.com/jmcheon/dslr/assets/40683323/c6221d34-d6e6-4edc-a906-733046cccced)
+<table>
+  <tr>
+    <th>Stochastic</th>
+    <th>Mini batch</th>
+    <th>Batch</th>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/jmcheon/dslr/assets/40683323/a5868045-6f6e-4a6b-bbb0-47369729723d" width="300" height="400"></td>
+    <td><img src="https://github.com/jmcheon/dslr/assets/40683323/dfb63958-9597-4f31-9831-f480b2db9988" width="300" height="400"></td>
+    <td><img src="https://github.com/jmcheon/dslr/assets/40683323/9c472695-eb61-4d82-bb7f-907753ab214f" width="300" height="400"></td>
+  </tr>
+</table>
