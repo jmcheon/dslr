@@ -43,7 +43,7 @@ def compare_optimization_algorithms(data, target_categories):
     fig, axes = plt.subplots(1, 3, figsize=(15, 8))
     for house in target_categories:
         house_label = mapping[house]
-        print(f"Current house: {house} (Label: {house_label})")
+        #print(f"Current house: {house} (Label: {house_label})")
 
         y_labeled = np.where(y == house_label, 1, 0).reshape(-1, 1)
 
@@ -63,7 +63,7 @@ def compare_optimization_algorithms(data, target_categories):
         theta_mini, accuracy_mini, accuracy_list_mini, loss_list_mini, epoch_list_mini = classifier_mini.mini_batch_fit(
             x, y_labeled)
 
-        print('Accuracy: ', accuracy_sgd, accuracy_mini, accuracy_batch)
+        #print('Accuracy: ', accuracy_sgd, accuracy_mini, accuracy_batch)
 
         house_color = colors[house]
 
@@ -76,19 +76,19 @@ def compare_optimization_algorithms(data, target_categories):
 
     axes[0].set_xlabel('epoch')
     axes[0].set_ylabel('loss')
-    # axes[0].set_ylim([0, 1])
+    axes[0].set_ylim([0, 1.1])
     axes[0].set_title('[Stochastic] Loss vs Epoch by Hogwarts House')
     axes[0].legend()
 
     axes[1].set_xlabel('epoch')
     axes[1].set_ylabel('loss')
-    # axes[1].set_ylim([0, 1])
+    axes[1].set_ylim([0, 1.1])
     axes[1].set_title('[Mini Batch] Loss vs Epoch by Hogwarts House')
     axes[1].legend()
 
     axes[2].set_xlabel('epoch')
     axes[2].set_ylabel('loss')
-    # axes[2].set_ylim([0, 1])
+    axes[2].set_ylim([0, 1.1])
     axes[2].set_title('[Batch] Loss vs Epoch by Hogwarts House')
     axes[2].legend()
     plt.tight_layout()
@@ -139,10 +139,6 @@ if __name__ == "__main__":
         y = df['Hogwarts House'].replace(mapping).values
         new_data = np.column_stack((normalized_x, y))
 
-        if len(sys.argv) == 2:
-            save(new_data, target_categories, 'batch')
-        else:
-            save(new_data, target_categories, sys.argv[2])
 
         # Bonus: plotting to compare all three gradient descent methods
         print("\nComparing optimizaiton algoritms:")

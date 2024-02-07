@@ -24,7 +24,7 @@ def display_histogram(df):
     grouped = df_scores.groupby('Hogwarts House')
 
     # Plot histograms for each homogeneous course
-    plt.figure()
+    plt.figure(figsize=(8, 6))
     for house, group in grouped:
         group[homogeneous_course].plot.hist(
             alpha=0.5, legend=True, bins=10, color=colors[house], label=house)
