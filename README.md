@@ -3,8 +3,14 @@
 
 | Requirements | Skills |
 |--------------|--------|
-| - `python3.7`<br> - `numpy`<br> - `pandas`<br> - `matplotlib`<br> - `scikit-learn`<br> - `seaborn` | - `DB & Data`<br> - `Algorithms & AI` |
+| - `python3.11`<br> - `numpy`<br> - `pandas`<br> - `matplotlib`<br> - `scikit-learn`<br> - `seaborn` | - `DB & Data`<br> - `Algorithms & AI` |
 
+
+## 0. Installation
+```bash
+sh ./launch_conda.sh
+conda activate 42AI-${USER}
+```
 
 ## 1. Data Analysis
 ### Description
@@ -107,6 +113,10 @@ From this visualization, what features are you going to use for your logistic re
 
 
 ## 3. Logistic Regression
+
+#### What is one-vs-all method
+
+The one-vs-all (OvA) method, also known as one-vs-rest (OvR), is a strategy used in multi-class classification problems in machine learning. It involves training multiple binary classifiers, one for each class, to distinguish between that specific class and all the other classes combined.
 
 #### Logistic regression
 
